@@ -11,7 +11,7 @@ typedef uint32_t vid_t;
 
 class csr_t {
  public:
-    vid_t  v_count; //This is actual vcount in a graph 
+    vid_t  v_count; //This is actual vcount in a graph
     vid_t  e_count;
     vid_t  dst_size;
     vid_t* offset;
@@ -42,7 +42,7 @@ class csr_t {
     	return offset;
     }
     vid_t* get_nebrs(){
-	return nebrs;    
+	     return nebrs;    
     }
 };
 
@@ -90,4 +90,3 @@ class graph_t {
     	return csr.get_degree(0);
     }
 };
-
