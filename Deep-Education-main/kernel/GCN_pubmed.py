@@ -73,7 +73,7 @@ if __name__ == "__main__":
         #logp_test = F.log_softmax(logits_test, 1)
 
         #acc_val = pubmed_util.accuracy(logp_test[test_id], test_y_label)
-        #print('Epoch %d | Test_accuracy: %.4f' % (epoch, acc_val))
+        print('Epoch %d | Test_accuracy: %.4f' % (epoch, acc_val))
 
     end = datetime.datetime.now()
     difference = end - start
