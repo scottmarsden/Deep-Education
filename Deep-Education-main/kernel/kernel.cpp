@@ -12,30 +12,49 @@ int THD_COUNT = 1;
 
 using std::string;
 
-void normalize(csr_t* snaph, array2d_t<float> & matrix) {
-  #pragma omp parallel{
-    #pragma omp for
-    for (int i = 0 ; i < matrix.row_count ; i++) {
-        matrix.row_normalize(i, snaph->get_degree(i));
+void normalize(csr_t* snaph, array2d_t<float> & matrix, bool parallel) {
+  
+  if (parallel){
+    #pragma omp parallel{
+      #pragma omp for
+      for (int i = 0 ; i < matrix.row_count ; i++) {
+          matrix.row_normalize(i, snaph->get_degree(i));
+      }
     }
+  }
+  else{
+    for (int i = 0 ; i < matrix.row_count ; i++) {
+          matrix.row_normalize(i, snaph->get_degree(i));
+      }
+    
   }
 }
 
-void multiply(csr_t* snaph, array2d_t<float> & input, array2d_t<float> & output){
+void multiply(csr_t* snaph, array2d_t<float> & input, array2d_t<float> & output, bool parallel){
     vid_t* offset = snaph->offset;
     vid_t* nebrs = snaph->nebrs;
     
-  
-    #pragma omp parallel {
-      #pragma omp for
-      for (int i = 0; i < output.row_count; i++) {
-         output.row_add(input.data_ptr + i*output.col_count, i); 
+    if (parallel){
+      #pragma omp parallel {
+        #pragma omp for
+        for (int i = 0; i < output.row_count; i++) {
+          output.row_add(input.data_ptr + i*output.col_count, i); 
         
-        for (int j = offset[i] ; j < offset[i+1] ; j++) {
-              output.row_add(input.data_ptr + nebrs[j]*output.col_count, nebrs[j]);
-          }
+          for (int j = offset[i] ; j < offset[i+1] ; j++) {
+                output.row_add(input.data_ptr + nebrs[j]*output.col_count, nebrs[j]);
+            }
+        }
       }
-    }
+  }
+  else {
+    for (int i = 0; i < output.row_count; i++) {
+          output.row_add(input.data_ptr + i*output.col_count, i); 
+        
+          for (int j = offset[i] ; j < offset[i+1] ; j++) {
+                output.row_add(input.data_ptr + nebrs[j]*output.col_count, nebrs[j]);
+            }
+        }
+  }
   
 }
 
@@ -50,14 +69,14 @@ void _gspmm(csr_t* snaph, array2d_t<float> & input, array2d_t<float> & output,
     //The core logic goes here.
   
   
-  
+    
     if(reverse){
-    normalize(snaph, input);
-    multiply(snaph, input, output);
+    normalize(snaph, input, true);
+    multiply(snaph, input, output, true);
     }
     else{
-      normalize(snaph, input);
-      multiply(snaph, input, output);
+      normalize(snaph, input, true);
+      multiply(snaph, input, output, true);
     }
 
     /*int64_t columnCount = output.columnCount;
